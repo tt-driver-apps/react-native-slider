@@ -98,6 +98,8 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   _trackSize: WidthAndHeight;
   _thumbSize: WidthAndHeight;
   _bubble: Bubble;
+  isMoving: boolean = false;
+  isPressed: boolean = false;
 
   static propTypes = {
     /**
@@ -237,7 +239,16 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   componentDidUpdate(prevProps: SliderProps) {
     const prevValue = prevProps.value;
     if (this.props.value !== prevValue) {
-      this._setCurrentValueAnimated(this.props.value);
+      this._setCurrentValueAnimated(this.props.value); 
+      if (this.isMoving) {
+        if (!this.isPressed) {
+          this._bubble.press();
+          this.isPressed = true;
+        }
+      }
+      if(!this.isMoving) {
+        this._fireChangeEvent('onSlidingComplete');
+      }
     }
   }
 
@@ -257,7 +268,12 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   }
 
   _handlePanResponderGrant = () => {
+    
+    if (!this.isMoving) {
+      this.isMoving = true;
+    }
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
+    this.changeThumSize(24);
     this._fireChangeEvent('onSlidingStart');
   };
 
@@ -265,6 +281,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     if (this.props.disabled) {
       return;
     }
+
     const _value = this._getValue(gestureState);
 
     if (_value !== this.state.value._value) {
@@ -287,6 +304,10 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     this._fireChangeEvent('onSlidingComplete');
     this._bubble.release();
     this.changeThumSize(16);
+    if (this.isMoving) {
+      this.isMoving = false;
+      this.isPressed = false;
+    }
   };
 
   _measureContainer = (x: Object) => this._handleMeasure('containerSize', x);
@@ -375,11 +396,14 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
       DEFAULT_ANIMATION_CONFIGS[animationType],
       this.props.animationConfig,
       {
-        toValue: value,
+        toValue: value
       },
     );
 
     Animated[animationType](this.state.value, animationConfig).start();
+    if (!this.isMoving) {
+      this._bubble.pressAndRelesase()
+    } 
   };
 
   _fireChangeEvent = (event: string): any => {
@@ -426,9 +450,10 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
 
   _thumbHitTest = (e: Object) => {
     const nativeEvent = e.nativeEvent;
-    this.changeThumSize(24);
     const thumbTouchRect = this._getThumbTouchRect();
-    this._bubble.press();
+
+    this.props.onValueChange(Math.floor(100 * nativeEvent.locationX / this.state.containerSize.width));
+
     return thumbTouchRect.containsPoint(
       nativeEvent.locationX,
       nativeEvent.locationY,
@@ -535,12 +560,13 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           style={[defaultStyles.touchArea, touchOverflowStyle]}
           {...this._panResponder.panHandlers}
         />
-        <Bubble 
+       <Bubble 
           ref={(bubble: any) => this._bubble = bubble}
           value={this.props.value}
           thumbTintColor={thumbTintColor}
           style={{
             position: 'absolute',
+            display: this.props.value < 1 && 'none',
             transform: [{ translateX: thumbLeft }, { translateY: 0 }],
           }}
           TextComponent={TextComponent}
@@ -548,7 +574,6 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
       </View>
     );
   }
-
 }
 
 const defaultStyles = StyleSheet.create({

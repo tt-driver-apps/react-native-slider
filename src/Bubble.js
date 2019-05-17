@@ -20,6 +20,7 @@ type ThumbProps = {
   style: any;
   TextComponent: RNText;
 }
+
 export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
   _timeoutID: ?Object = null;
 
@@ -47,12 +48,12 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
       this.state.fadeAnim,
       {
         toValue: 1,
-        duration: 500,
+        duration: 200,
       }
     ).start();
   }
 
-  release(): void {
+  release(delay: number = 0): void {
     this._timeoutID = setTimeout(() =>  
       Animated.timing(
         this.state.fadeAnim,
@@ -61,7 +62,17 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
           duration: 500,
         }
       ).start(), 
-    0);
+    delay);
+  }
+
+  pressAndRelesase(): void {
+    Animated.timing(
+      this.state.fadeAnim,
+      {
+        toValue: 1,
+        duration: 500,
+      }
+    ).start(() => this.release(500));
   }
 
   componentWillUnmount() {
