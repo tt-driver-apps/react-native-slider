@@ -451,8 +451,9 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   _thumbHitTest = (e: Object) => {
     const nativeEvent = e.nativeEvent;
     const thumbTouchRect = this._getThumbTouchRect();
-
-    this.props.onValueChange(Math.floor(100 * nativeEvent.locationX / this.state.containerSize.width));
+    
+    this._setCurrentValue(Math.floor(100 * nativeEvent.locationX / this.state.containerSize.width));
+    this._fireChangeEvent('onValueChange');
 
     return thumbTouchRect.containsPoint(
       nativeEvent.locationX,
@@ -564,16 +565,18 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           ref={(bubble: any) => this._bubble = bubble}
           value={this.props.value}
           thumbTintColor={thumbTintColor}
-          style={{
+          style={[{
             position: 'absolute',
-            display: this.props.value < 1 && 'none',
             transform: [{ translateX: thumbLeft }, { translateY: 0 }],
-          }}
+          }, 
+          this.props.value < 1 ? {display: 'none'} : {},
+          ]}
           TextComponent={TextComponent}
         />
       </View>
     );
   }
+
 }
 
 const defaultStyles = StyleSheet.create({
