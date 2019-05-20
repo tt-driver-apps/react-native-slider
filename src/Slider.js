@@ -453,8 +453,9 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   _thumbHitTest = (e: Object) => {
     const nativeEvent = e.nativeEvent;
     const thumbTouchRect = this._getThumbTouchRect();
-    
-    this._setCurrentValue(Math.floor(ONE_HUNDRED_PERCENT * nativeEvent.locationX / this.state.containerSize.width));
+    const getPositionBasedOnPercentage = Math.floor(ONE_HUNDRED_PERCENT * nativeEvent.locationX / this.state.containerSize.width);
+
+    this._setCurrentValue(getPositionBasedOnPercentage);
     this._fireChangeEvent('onValueChange');
 
     return thumbTouchRect.containsPoint(
