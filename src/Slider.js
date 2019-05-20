@@ -24,7 +24,10 @@ const { UIManager } = NativeModules;
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
 
-const TRACK_SIZE = 4;
+const TRACK_SIZE: number = 4;
+const BIG_SIZE: number = 24;
+const SMALL_SIZE: number = 16;
+const ONE_HUNDRED_PERCENT: number = 100;
 
 function Rect(x, y, width, height) {
   this.x = x;
@@ -90,7 +93,6 @@ type WidthAndHeight = {
   width: number;
   height: number;
 }
-
 export default class Slider extends PureComponent<SliderProps, SliderState> {
   _panResponder: PanResponderInstance;
   _previousLeft: number;
@@ -273,7 +275,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
       this.isMoving = true;
     }
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
-    this.changeThumSize(24);
+    this.changeThumSize(BIG_SIZE);
     this._fireChangeEvent('onSlidingStart');
   };
 
@@ -303,7 +305,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     this._setCurrentValue(this._getValue(gestureState));
     this._fireChangeEvent('onSlidingComplete');
     this._bubble.release();
-    this.changeThumSize(16);
+    this.changeThumSize(SMALL_SIZE);
     if (this.isMoving) {
       this.isMoving = false;
       this.isPressed = false;
@@ -452,7 +454,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     const nativeEvent = e.nativeEvent;
     const thumbTouchRect = this._getThumbTouchRect();
     
-    this._setCurrentValue(Math.floor(100 * nativeEvent.locationX / this.state.containerSize.width));
+    this._setCurrentValue(Math.floor(ONE_HUNDRED_PERCENT * nativeEvent.locationX / this.state.containerSize.width));
     this._fireChangeEvent('onValueChange');
 
     return thumbTouchRect.containsPoint(
