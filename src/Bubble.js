@@ -27,7 +27,7 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
   static propTypes = {
     value: PropTypes.number,
     thumbTintColor: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.any,
     TextComponent: PropTypes.any
   };
 
