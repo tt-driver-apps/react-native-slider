@@ -24,7 +24,10 @@ const { UIManager } = NativeModules;
 UIManager.setLayoutAnimationEnabledExperimental &&
   UIManager.setLayoutAnimationEnabledExperimental(true);
 
-const TRACK_SIZE = 4;
+const TRACK_SIZE: number = 4;
+const BIG_SIZE: number = 24;
+const SMALL_SIZE: number = 16;
+const ONE_HUNDRED_PERCENT: number = 100;
 
 function Rect(x, y, width, height) {
   this.x = x;
@@ -90,7 +93,6 @@ type WidthAndHeight = {
   width: number;
   height: number;
 }
-
 export default class Slider extends PureComponent<SliderProps, SliderState> {
   _panResponder: PanResponderInstance;
   _previousLeft: number;
@@ -98,6 +100,8 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   _trackSize: WidthAndHeight;
   _thumbSize: WidthAndHeight;
   _bubble: Bubble;
+  isMoving: boolean = false;
+  isPressed: boolean = false;
 
   static propTypes = {
     /**
@@ -237,7 +241,16 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   componentDidUpdate(prevProps: SliderProps) {
     const prevValue = prevProps.value;
     if (this.props.value !== prevValue) {
-      this._setCurrentValueAnimated(this.props.value);
+      this._setCurrentValueAnimated(this.props.value); 
+      if (this.isMoving) {
+        if (!this.isPressed) {
+          this._bubble.press();
+          this.isPressed = true;
+        }
+      }
+      if(!this.isMoving) {
+        this._fireChangeEvent('onSlidingComplete');
+      }
     }
   }
 
@@ -257,7 +270,12 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
   }
 
   _handlePanResponderGrant = () => {
+    
+    if (!this.isMoving) {
+      this.isMoving = true;
+    }
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
+    this.changeThumSize(BIG_SIZE);
     this._fireChangeEvent('onSlidingStart');
   };
 
@@ -265,6 +283,7 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     if (this.props.disabled) {
       return;
     }
+
     const _value = this._getValue(gestureState);
 
     if (_value !== this.state.value._value) {
@@ -286,7 +305,11 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
     this._setCurrentValue(this._getValue(gestureState));
     this._fireChangeEvent('onSlidingComplete');
     this._bubble.release();
-    this.changeThumSize(16);
+    this.changeThumSize(SMALL_SIZE);
+    if (this.isMoving) {
+      this.isMoving = false;
+      this.isPressed = false;
+    }
   };
 
   _measureContainer = (x: Object) => this._handleMeasure('containerSize', x);
@@ -375,11 +398,14 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
       DEFAULT_ANIMATION_CONFIGS[animationType],
       this.props.animationConfig,
       {
-        toValue: value,
+        toValue: value
       },
     );
 
     Animated[animationType](this.state.value, animationConfig).start();
+    if (!this.isMoving) {
+      this._bubble.pressAndRelesase()
+    } 
   };
 
   _fireChangeEvent = (event: string): any => {
@@ -426,9 +452,12 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
 
   _thumbHitTest = (e: Object) => {
     const nativeEvent = e.nativeEvent;
-    this.changeThumSize(24);
     const thumbTouchRect = this._getThumbTouchRect();
-    this._bubble.press();
+    const getPositionBasedOnPercentage = Math.floor(ONE_HUNDRED_PERCENT * nativeEvent.locationX / this.state.containerSize.width);
+
+    this._setCurrentValue(getPositionBasedOnPercentage);
+    this._fireChangeEvent('onValueChange');
+
     return thumbTouchRect.containsPoint(
       nativeEvent.locationX,
       nativeEvent.locationY,
@@ -535,14 +564,16 @@ export default class Slider extends PureComponent<SliderProps, SliderState> {
           style={[defaultStyles.touchArea, touchOverflowStyle]}
           {...this._panResponder.panHandlers}
         />
-        <Bubble 
+       <Bubble 
           ref={(bubble: any) => this._bubble = bubble}
           value={this.props.value}
           thumbTintColor={thumbTintColor}
-          style={{
+          style={[{
             position: 'absolute',
             transform: [{ translateX: thumbLeft }, { translateY: 0 }],
-          }}
+          }, 
+          this.props.value < 1 ? {display: 'none'} : {},
+          ]}
           TextComponent={TextComponent}
         />
       </View>
