@@ -1,5 +1,5 @@
 /* @flow */
-'use strict';
+
 
 import React, { PureComponent } from 'react';
 import {
@@ -27,7 +27,10 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
   static propTypes = {
     value: PropTypes.number,
     thumbTintColor: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.oneOfType([
+      PropTypes.object, 
+      PropTypes.array
+    ]),
     TextComponent: PropTypes.any
   };
 
@@ -101,7 +104,7 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
 
 const styles = StyleSheet.create({
   triangle: {
-    top: 2,
+    top: 3,
     width: 0,
     height: 0,
     backgroundColor: 'transparent',
