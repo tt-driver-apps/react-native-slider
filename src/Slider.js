@@ -226,7 +226,7 @@ export default class Slider extends PureComponent {
 
   componentWillUnmount() {
     if(this.timeoutId != null) {
-      clearTimeout(this.timeoutId)
+      clearTimeout(this.timeoutId);
     }
   }
 
@@ -551,8 +551,8 @@ export default class Slider extends PureComponent {
     this.timeoutId = setTimeout(() => {
       this.movement === false ?  
         this._bubble.release() :  
-        {}
-    }, 1500)
+        {};
+    }, 1500);
 
     return thumbTouchRect.containsPoint(
       nativeEvent.locationX,
@@ -617,7 +617,7 @@ export default class Slider extends PureComponent {
         position: 'absolute',
         transform: [{ translateX: thumbLeft }, { translateY: 0 }],
       }, 
-      this.props.value < 1 ? {display: 'none'} : {},
+        this.props.value < 1 ? {display: 'none'} : {},
       ]}
       TextComponent={TextComponent}
     />
