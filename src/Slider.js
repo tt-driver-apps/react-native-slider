@@ -595,10 +595,8 @@ export default class Slider extends PureComponent {
 
   _renderThumbImage = () => {
     const { thumbImage } = this.props;
-    const { animThumbSize } = this.state;
-    if (!thumbImage) (
-      <View style={{ width: animThumbSize, height: animThumbSize, borderRadius: animThumbSize / 2}}/>
-    );
+
+    if (!thumbImage) return;
 
     return <Image source={thumbImage} />;
   };
