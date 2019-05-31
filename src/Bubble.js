@@ -21,6 +21,8 @@ type ThumbProps = {
   TextComponent: RNText;
 }
 
+const formatValue = (value: number): number => value >= 100 ? 100 : value;
+
 export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
   _timeoutID: ?Object = null;
 
@@ -92,10 +94,10 @@ export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
       style,
       TextComponent,
     } = this.props;
-
+    
     return (
       <Animated.View style={[styles.bubble, style, { backgroundColor: thumbTintColor, opacity: fadeAnim }]} >
-        <TextComponent style={styles.percentage}>{`${value}%`}</TextComponent> 
+        <TextComponent style={styles.percentage}>{`${formatValue(value)}%`}</TextComponent> 
         <View style={[styles.triangle, styles.arrowDown, { borderTopColor: thumbTintColor }]}/>
       </Animated.View>
     );
