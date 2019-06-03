@@ -45,10 +45,10 @@ const DEFAULT_ANIMATION_CONFIGS = {
     easing: Easing.inOut(Easing.ease),
     delay: 0,
   },
-  decay : { // This has a serious bug
-    velocity     : 1,
-    deceleration : 0.997
-  }
+  // decay : { // This has a serious bug
+  //   velocity     : 1,
+  //   deceleration : 0.997
+  // }
 };
 
 export default class Slider extends PureComponent {
@@ -198,6 +198,7 @@ export default class Slider extends PureComponent {
     thumbSize: { width: 0, height: 0 },
     allMeasured: false,
     value: new Animated.Value(this.props.value),
+    animThumbSize: THUMB_SIZE,
   };
 
   componentWillMount() {
@@ -255,6 +256,7 @@ export default class Slider extends PureComponent {
       trackSize,
       thumbSize,
       allMeasured,
+      animThumbSize,
     } = this.state;
     const mainStyles = styles || defaultStyles;
     const thumbLeft = value.interpolate({
@@ -310,6 +312,7 @@ export default class Slider extends PureComponent {
             mainStyles.thumb,
             thumbStyle,
             {
+              borderRadius: animThumbSize / 2,
               transform: [{ translateX: thumbLeft }, { translateY: 0 }],
               ...valueVisibleStyle,
             },
@@ -386,6 +389,7 @@ export default class Slider extends PureComponent {
     this._bubble.release();
     this._setCurrentValue(this._getValue(gestureState));
     this._fireChangeEvent('onSlidingComplete');
+    this.changeThumSize(THUMB_SIZE);
     this.movement = false;
   };
 
@@ -539,6 +543,7 @@ export default class Slider extends PureComponent {
 
   _thumbHitTest = (e: Object) => {
     this._bubble.press();
+    this.changeThumSize(25);
 
     const nativeEvent = e.nativeEvent;
     const thumbTouchRect = this._getThumbTouchRect();
@@ -547,10 +552,11 @@ export default class Slider extends PureComponent {
     this._setCurrentValue(getPositionBasedOnPercentage);
     this._fireChangeEvent('onValueChange');
     this._fireChangeEvent('onSlidingComplete');
+    
 
     this.timeoutId = setTimeout(() => {
       this.movement === false ?  
-        this._bubble.release() :  
+       this._bubble.release():  
         {};
     }, 1500);
 
@@ -594,9 +600,10 @@ export default class Slider extends PureComponent {
   };
 
   _renderThumbImage = () => {
+    const { animThumbSize } = this.state
     const { thumbImage } = this.props;
 
-    if (!thumbImage) return;
+    if (!thumbImage) return <View style={{ width: animThumbSize, height: animThumbSize, borderRadius: animThumbSize / 2}}/>;
 
     return <Image source={thumbImage} />;
   };
@@ -607,20 +614,26 @@ export default class Slider extends PureComponent {
     if (!TextComponent) return;
 
     return (
-    <Bubble 
-      ref={bubble => this._bubble = bubble}
-      value={this.props.value}
-      thumbTintColor={thumbTintColor}
-      style={[{
-        position: 'absolute',
-        transform: [{ translateX: thumbLeft }, { translateY: 0 }],
-      }, 
-        this.props.value < 1 ? {display: 'none'} : {},
-      ]}
-      TextComponent={TextComponent}
-    />
+      <Bubble 
+        ref={bubble => this._bubble = bubble}
+        value={this.props.value}
+        thumbTintColor={thumbTintColor}
+        style={[{
+          position: 'absolute',
+          transform: [{ translateX: thumbLeft }, { translateY: 0 }],
+        }, 
+          this.props.value < 1 ? {display: 'none'} : {},
+        ]}
+        TextComponent={TextComponent}
+      />
     );
   };
+
+  changeThumSize = (size: number) => {
+    // LayoutAnimation.spring();
+    this.setState({ animThumbSize: size });
+  }
+
 }
 
 var defaultStyles = StyleSheet.create({
@@ -634,9 +647,9 @@ var defaultStyles = StyleSheet.create({
   },
   thumb: {
     position: 'absolute',
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    borderRadius: THUMB_SIZE / 2,
+    // width: THUMB_SIZE,
+    // height: THUMB_SIZE,
+    // borderRadius: THUMB_SIZE / 2,
   },
   touchArea: {
     position: 'absolute',
