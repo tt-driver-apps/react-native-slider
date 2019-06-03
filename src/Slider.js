@@ -556,7 +556,10 @@ export default class Slider extends PureComponent {
 
     this.timeoutId = setTimeout(() => {
       this.movement === false ?  
-       this._bubble.release():  
+        () => {
+         this._bubble.release()
+         this.changeThumSize(THUMB_SIZE);
+        }:  
         {};
     }, 1500);
 
@@ -647,9 +650,6 @@ var defaultStyles = StyleSheet.create({
   },
   thumb: {
     position: 'absolute',
-    // width: THUMB_SIZE,
-    // height: THUMB_SIZE,
-    // borderRadius: THUMB_SIZE / 2,
   },
   touchArea: {
     position: 'absolute',
