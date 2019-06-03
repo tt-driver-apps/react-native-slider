@@ -24,7 +24,7 @@ type ThumbProps = {
 const formatValue = (value: number): number => value >= 100 ? 100 : value;
 
 export default class Thumb extends PureComponent<ThumbProps, ThumbState> {
-  _timeoutID: ?Object = null;
+  _timeoutID: ?Number = null;
 
   static propTypes = {
     value: PropTypes.number,
