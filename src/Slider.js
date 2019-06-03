@@ -546,7 +546,7 @@ export default class Slider extends PureComponent {
 
     this._setCurrentValue(getPositionBasedOnPercentage);
     this._fireChangeEvent('onValueChange');
-    
+    this._fireChangeEvent('onSlidingComplete');
 
     this.timeoutId = setTimeout(() => {
       this.movement === false ?  
