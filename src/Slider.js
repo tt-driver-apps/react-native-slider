@@ -541,6 +541,11 @@ export default class Slider extends PureComponent {
     return touchOverflowStyle;
   };
 
+  _callRelease = () => {
+    this._bubble.release()
+    this.changeThumSize(THUMB_SIZE)
+  }
+
   _thumbHitTest = (e: Object) => {
     this._bubble.press();
     this.changeThumSize(25);
@@ -556,19 +561,16 @@ export default class Slider extends PureComponent {
 
     this.timeoutId = setTimeout(() => {
       this.movement === false ?  
-        () => {
-         this._bubble.release()
-         this.changeThumSize(THUMB_SIZE);
-        }:  
+        this._callRelease():  
         {};
-    }, 1500);
+    }, 800);
 
     return thumbTouchRect.containsPoint(
       nativeEvent.locationX,
       nativeEvent.locationY,
     );
   };
-
+ 
   _getThumbTouchRect = () => {
     const state = this.state;
     const props = this.props;
