@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   percentage: { 
     textAlign: 'center', 
     color: 'white', 
-    paddingTop: 9, 
+    paddingTop: 7, 
     fontSize: 16 
   },
   bubble: { 
